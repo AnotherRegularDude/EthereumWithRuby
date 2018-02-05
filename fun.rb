@@ -8,4 +8,4 @@ contract = Ethereum::Contract.create(file: "greeter.sol")
 contract.deploy_and_wait("Oh, SHI~, it's working!")
 
 # Show "Oh, SHI~, it's working!"
-contract.call.greet
+p contract.call.greet
