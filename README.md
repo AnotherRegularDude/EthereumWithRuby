@@ -22,7 +22,7 @@ parity --chain ropsten account list
 Качаем нужную версию **Ethminer** с [GitHub](https://github.com/ethereum-mining/ethminer/releases).
 Для *Linux*:
 ```bash
-wget https://github.com/ethereum-mining/ethminer/releases/download/v0.14.0.dev1/ethminer-0.14.0.dev1-Linux.tar.gz
+wget -q https://github.com/ethereum-mining/ethminer/releases/download/v0.14.0.dev1/ethminer-0.14.0.dev1-Linux.tar.gz
 tar -xzvf ethminer-0.14.0.dev1-Linux.tar.gz bin/ethminer
 sudo mv bin/ethminer /usr/local/bin
 rm -rf ethminer-0.14.0.dev1-Linux.tar.gz bin
@@ -36,4 +36,10 @@ ethminer -F http://localhost:8545
 Или майним через клиент **geth**:
 ```bash
 geth --mine --minerthreads=4 --etherbase 'parity --chain ropsten account list [0]' --testnet
+```
+
+## Как запустить development chain скрипта
+Из корня проекта:
+```bash
+parity --config dev --unlock '0x00a329c0648769a73afac7f9381e08fb43dbea72' --password password
 ```
