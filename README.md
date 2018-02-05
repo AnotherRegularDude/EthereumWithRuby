@@ -7,15 +7,15 @@
 
 После установки, запускаем клиент Parity коммандой:
 ```bash
-parity --testnet
+parity --chain ropsten
 ```
 
 Пока ждем синхронизацию клиента с сеткой, заводим аккаунт на тестовой ветке:
 ```bash
 # Создаем акк.
-parity --testnet account new
+parity --chain ropsten account new
 # Проверяем, что создался.
-parity --testnet account list
+parity --chain ropsten account list
 ```
 
 ## Как намайнить Ethereum, если у вас не amdgpu.
@@ -28,7 +28,12 @@ sudo mv bin/ethminer /usr/local/bin
 rm -rf ethminer-0.14.0.dev1-Linux.tar.gz bin
 ```
 
-Теперь запускаем клиент Parity на testnet с созданным аккаунтом и майним на него:
+Теперь запускаем клиент Parity на **Ropsten** созданным аккаунтом и майним на него:
 ```bash
 ethminer -F http://localhost:8545
+```
+
+Или майним через клиент **geth**:
+```bash
+geth --mine --minerthreads=4 --etherbase 'parity --chain ropsten account list [0]' --testnet
 ```
