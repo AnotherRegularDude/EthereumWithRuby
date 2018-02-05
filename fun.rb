@@ -4,12 +4,15 @@ require 'bundler/setup'
 # Require all gems in Gemfile with Bundler.
 Bundler.require(:default)
 
+dir_path = File.absolute_path(File.dirname(__FILE__))
+solid_path = File.join(dir_path, 'solidity_scripts')
+
 p 'Creating Greeter contract...'
-contract_greeter = Ethereum::Contract.create(file: 'greeter.sol')
+contract_greeter = Ethereum::Contract.create(file: File.join(solid_path, 'greeter.sol'))
 contract_greeter.deploy_and_wait("Oh, SHI~, it's working!")
 
 p 'Creating Simple Storage contract...'
-contract_simple_storage = Ethereum::Contract.create(file: 'simple_storage.sol')
+contract_simple_storage = Ethereum::Contract.create(file: File.join(solid_path, 'simple_storage.sol'))
 contract_simple_storage.deploy_and_wait
 
 random_number = rand(1..100)
