@@ -38,8 +38,16 @@ ethminer -F http://localhost:8545
 geth --mine --minerthreads=4 --etherbase 'parity --chain ropsten account list [0]' --testnet
 ```
 
-## Как запустить development chain скрипта
+## Как запустить development chain через parity.
+### Bash
 Из корня проекта:
 ```bash
 parity --config dev --unlock '0x00a329c0648769a73afac7f9381e08fb43dbea72' --password password
+```
+
+### Rake task
+```bash
+rake node:start # Run dev chain via parity.
+rake node:stop # Stop parity node.
+rake node:clear_pid # Clear pid file in tmp folder
 ```
