@@ -6,4 +6,5 @@ git_source(:github) do |repo_name|
 end
 
 gem 'ethereum.rb'
+gem 'rake'
 gem 'pry'
