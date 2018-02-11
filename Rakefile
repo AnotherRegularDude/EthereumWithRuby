@@ -5,21 +5,25 @@ end
 namespace :node do
   desc 'Start parity node in development mode with unlocked wallet'
   task start: :environment do
-    address = '0x00a329c0648769a73afac7f9381e08fb43dbea72'
-    pass = PathHolder.root_join('password')
+    if File.exist? PathHolder.parity_pid_path
+      puts 'Node already running.'
+    else
+      address = '0x00a329c0648769a73afac7f9381e08fb43dbea72'
+      pass = PathHolder.root_join('password')
 
-    pid = Process.spawn "parity --config dev --unlock #{address} --password #{pass} > /dev/null 2>&1"
-    Process.detach(pid)
+      pid = Process.spawn "parity --config dev --unlock #{address} --password #{pass} > /dev/null 2>&1"
+      Process.detach(pid)
 
-    File.write(PathHolder.root_join('tmp', 'parity.pid'), pid + 2)
-
-    puts 'Started.'
+      File.write(PathHolder.parity_pid_path, pid + 2)
+      puts 'Started.'
+    end
   end
 
   desc 'Stop started parity node'
   task stop: :environment do
-    path_to_pid = PathHolder.root_join('tmp', 'parity.pid')
-    if File.exist? path_to_pid
+    if File.exist? PathHolder.parity_pid_path
+      path_to_pid = PathHolder.parity_pid_path
+
       pid = File.read(path_to_pid).to_i
       File.delete(path_to_pid)
 
@@ -28,6 +32,11 @@ namespace :node do
     else
       puts 'No node running.'
     end
+  end
+
+  desc 'Clear pid file in tmp'
+  task clear_pid: :environment do
+    FileUtils.rm_f(PathHolder.parity_pid_path)
   end
 end
 

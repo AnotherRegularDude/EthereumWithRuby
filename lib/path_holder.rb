@@ -10,5 +10,9 @@ class PathHolder
     def solid_script_path(script_name)
       File.join(SOLID_PATH, "#{script_name}.sol")
     end
+
+    def parity_pid_path
+      root_join('tmp', 'parity.pid')
+    end
   end
 end
