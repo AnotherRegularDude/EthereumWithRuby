@@ -1,3 +1,8 @@
+require 'rspec/core/rake_task'
+
+RSpec::Core::RakeTask.new(:spec)
+task default: :spec
+
 task :environment do
   require_relative 'lib/initializer'
 end
@@ -41,10 +46,13 @@ namespace :node do
 end
 
 namespace :contract do
-  desc 'Create contract'
+  desc 'Create contract, with/without constructor'
   task :create, [:file_name] => :environment do |_, args|
+    constructor_args = ENV.fetch('CONSTRUCTOR_ARGS', '').split(',')
     path_to = PathHolder.solid_script_path(args.file_name)
-    contract = ContractCreationService.create_and_wait(file_path: path_to)
+    contract = ContractCreationService.create_and_wait(
+      file_path: path_to, contract_args: constructor_args
+    )
 
     puts 'Done'
     puts "Address of contract: #{contract.address}"

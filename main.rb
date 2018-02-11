@@ -3,18 +3,15 @@ require_relative 'lib/initializer'
 puts 'Creating Greeter contract...'
 contract_greeter = ContractCreationService.from_address(
   file_path: PathHolder.solid_script_path('greeter'),
-  address: '0xf9edd91fc3db8f943cbea1fc56287262e9f26d88'
+  address: '0x731a10897d267e19b34503ad902d0a29173ba4b1'
 )
 
 puts 'Creating Simple Storage contract...'
 contract_simple_storage = ContractCreationService.from_address(
   file_path: PathHolder.solid_script_path('simple_storage'),
-  address: '0x85ae1e5291a86dfc12d867f5ff040c82efb9135d'
+  address: '0xb4c79dab8f259c7aee6e5b2aa729821864227e84'
 )
 
 # Show "Oh, SHI~, it's working!"
-p contract_greeter.call.greet
+p contract_greeter
 p contract_simple_storage.call.get_data
-
-puts "Address of greeter: #{contract_greeter.address}"
-puts "Address of contract_simple_storage: #{contract_simple_storage.address}"
