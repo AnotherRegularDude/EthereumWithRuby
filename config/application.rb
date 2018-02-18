@@ -21,7 +21,7 @@ module PlayEthereumWithRuby
 
     config.cache_store = :redis_store, 'redis://redis:6379/0/cache', { expires_in: 90.minutes }
 
-    config.x = Hashie::Mash.new YAML.safe_load(File.read(Rails.root.join('config', 'settings.yml')))
+    config.x = Hashie::Mash.new YAML.load(ERB.new(File.read(Rails.root.join('config', 'settings.yml'))).result)
 
     config.middleware.insert_before 0, Rack::Cors do
       allow do
