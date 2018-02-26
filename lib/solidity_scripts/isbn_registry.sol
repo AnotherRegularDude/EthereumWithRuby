@@ -19,16 +19,35 @@ contract IsbnRegistry {
   }
 
   address public owner;
-  uint public indexCounter;
+  uint public indexId;
+  uint public itemsCount;
 
   mapping(bytes32 => IsbnEntity) public entityMapping;
   mapping(uint => bytes32) public isbnIndexMapping;
+  mapping(address => bool) public editorMapping;
 
   function IsbnRegistry() public {
     owner = msg.sender;
-    indexCounter = 0;
+    indexId = 0;
+    itemsCount = 0;
+
+    editorMapping[owner] = true;
   }
 
+  // Manage addresses, that cat edit registry items.
+  function addEditorAddress(address newEditor) public {
+    require(owner == msg.sender);
+
+    editorMapping[newEditor] = true;
+  }
+
+  function deleteEditorAddress(address deletedEditor) public {
+    require(owner == msg.sender);
+
+    delete editorMapping[deletedEditor];
+  }
+
+  // Manage registry items.
   function addBookToRegistry(
     string fullTitle,
     string isbn10,
@@ -42,7 +61,7 @@ contract IsbnRegistry {
     uint depth,
     string overview) public
   {
-    require(owner == msg.sender);
+    require(editorMapping[msg.sender]);
     require(bytes(isbn10).length == 10 && bytes(isbn13).length == 13);
 
     bytes32 isbn10b;
@@ -69,16 +88,38 @@ contract IsbnRegistry {
       overview: overview
     });
 
-    isbnIndexMapping[indexCounter] = isbn13b;
+    isbnIndexMapping[indexId] = isbn13b;
     entityMapping[isbn13b] = newBook;
-    indexCounter += 1;
+
+    indexId += 1;
+    itemsCount += 1;
+  }
+
+  function deleteBookFromRegistry(bytes32 isbn13) public {
+    require(editorMapping[msg.sender]);
+
+    if (itemsCount == 0) {
+      return;
+    }
+
+    for (uint i = 0; i < indexId; i++) {
+      if (isbnIndexMapping[i] == isbn13) {
+        delete isbnIndexMapping[i];
+        delete entityMapping[isbn13];
+        itemsCount -= 1;
+
+        break;
+      }
+    }
   }
 
   function getAllStoredIsbns() public view returns(bytes32[]) {
-    bytes32[] memory result = new bytes32[](indexCounter);
+    bytes32[] memory result = new bytes32[](itemsCount);
 
-    for(uint i = 0; i < indexCounter; i++) {
-      result[i] = (isbnIndexMapping[i]);
+    for (uint i = 0; i < indexId; i++) {
+      if (isbnIndexMapping[i] != 0x0) {
+        result[i] = isbnIndexMapping[i];
+      }
     }
 
     return result;
