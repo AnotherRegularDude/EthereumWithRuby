@@ -9,9 +9,7 @@ contract IsbnRegistry {
     bytes32 isbn10;
     bytes32 isbn13;
     uint edition;
-    bytes32 publishDate;
-    uint bindingWithBook;
-    uint priceInRubles;
+    uint binding;
     bool deleted;
   }
 
@@ -24,6 +22,8 @@ contract IsbnRegistry {
   struct AdditionalInfo {
     bytes32 author;
     string description;
+    bytes32 publishDate;
+    uint priceInRubles;
   }
 
   address public owner;
@@ -56,27 +56,23 @@ contract IsbnRegistry {
   }
 
   // Manage registry items.
-  function addBookToRegistry(
+  function addBook(
     bytes32 title,
     string isbn10,
     string isbn13,
     EditionType edition,
-    bytes32 publishDate,
-    BindingBookType bindingWithBook,
-    uint priceInRubles) public
+    BindingBookType binding) public
   {
     require(editorMapping[msg.sender]);
     require(bytes(isbn10).length == 10 && bytes(isbn13).length == 13);
-    require(priceInRubles > 0);
+    require(title != 0x0);
 
     IsbnEntity memory newBook = IsbnEntity({
       title: title,
       isbn10: stringToBytes32(isbn10),
       isbn13: stringToBytes32(isbn13),
       edition: uint(edition),
-      publishDate: publishDate,
-      bindingWithBook: uint(bindingWithBook),
-      priceInRubles: priceInRubles,
+      binding: uint(binding),
       deleted: false
     });
 
@@ -85,7 +81,7 @@ contract IsbnRegistry {
     commonIndexId += 1;
   }
 
-  function setBookDimensions(uint id, uint width, uint height, uint depth) public {
+  function setBookDimensions(uint id, uint height, uint width, uint depth) public {
     require(editorMapping[msg.sender]);
     require(entityMapping[id].isbn13 != 0x0);
     require(width > 0 && height > 0 && depth > 0);
@@ -99,12 +95,17 @@ contract IsbnRegistry {
     dimensionsMapping[id] = newDimensions;
   }
 
-  function setBookAdditionalInfo(uint id, bytes32 author, string description) public {
+  function setBookAdditionalInfo(
+    uint id, bytes32 author, bytes32 publishDate, uint priceInRubles, string description) public
+  {
     require(editorMapping[msg.sender]);
     require(entityMapping[id].isbn13 != 0x0);
+    require(priceInRubles > 0);
 
     AdditionalInfo memory newInfo = AdditionalInfo({
       author: author,
+      publishDate: publishDate,
+      priceInRubles: priceInRubles,
       description: description
     });
 
@@ -117,9 +118,7 @@ contract IsbnRegistry {
     string isbn10,
     string isbn13,
     EditionType edition,
-    bytes32 publishDate,
-    BindingBookType bindingWithBook,
-    uint priceInRubles) public
+    BindingBookType binding) public
   {
     require(editorMapping[msg.sender]);
 
@@ -127,16 +126,14 @@ contract IsbnRegistry {
 
     require(changedBook.isbn13 != 0x0);
     require(bytes(isbn10).length == 10 && bytes(isbn13).length == 13);
-    require(priceInRubles > 0);
+    require(title != 0x0);
 
     IsbnEntity memory newBook = IsbnEntity({
       title: title,
       isbn10: stringToBytes32(isbn10),
       isbn13: stringToBytes32(isbn13),
       edition: uint(edition),
-      publishDate: publishDate,
-      bindingWithBook: uint(bindingWithBook),
-      priceInRubles: priceInRubles,
+      binding: uint(binding),
       deleted: changedBook.deleted
     });
 

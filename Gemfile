@@ -16,6 +16,7 @@ gem 'puma', '~> 3.7'
 gem 'rack-cors', require: 'rack/cors'
 gem 'rails', '~> 5.1.5'
 gem 'redis-rails'
+gem 'virtus'
 
 group :development, :test do
   gem 'pry-byebug'
