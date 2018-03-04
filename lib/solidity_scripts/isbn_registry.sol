@@ -5,31 +5,39 @@ contract IsbnRegistry {
   enum BindingBookType { Hardcover, Paperbound, VHS, Laserdisc, EBook }
 
   struct IsbnEntity {
-    string fullTitle;
+    bytes32 title;
     bytes32 isbn10;
     bytes32 isbn13;
-    uint publisher;
     uint edition;
-    uint publishDate;
+    bytes32 publishDate;
     uint bindingWithBook;
+    uint priceInRubles;
+    bool deleted;
+  }
+
+  struct Dimensions {
     uint width;
     uint height;
     uint depth;
-    string overview;
+  }
+
+  struct AdditionalInfo {
+    bytes32 author;
+    string description;
   }
 
   address public owner;
-  uint public indexId;
-  uint public itemsCount;
+  uint public commonIndexId;
 
-  mapping(bytes32 => IsbnEntity) public entityMapping;
-  mapping(uint => bytes32) public isbnIndexMapping;
+  mapping(uint => IsbnEntity) public entityMapping;
+  mapping(uint => Dimensions) public dimensionsMapping;
+  mapping(uint => AdditionalInfo) public additionalInfoMapping;
+
   mapping(address => bool) public editorMapping;
 
   function IsbnRegistry() public {
     owner = msg.sender;
-    indexId = 0;
-    itemsCount = 0;
+    commonIndexId = 0;
 
     editorMapping[owner] = true;
   }
@@ -49,79 +57,112 @@ contract IsbnRegistry {
 
   // Manage registry items.
   function addBookToRegistry(
-    string fullTitle,
+    bytes32 title,
     string isbn10,
     string isbn13,
-    uint publisher,
     EditionType edition,
-    uint publishDate,
+    bytes32 publishDate,
     BindingBookType bindingWithBook,
-    uint width,
-    uint height,
-    uint depth,
-    string overview) public
+    uint priceInRubles) public
   {
     require(editorMapping[msg.sender]);
     require(bytes(isbn10).length == 10 && bytes(isbn13).length == 13);
-
-    bytes32 isbn10b;
-    bytes32 isbn13b;
-
-    assembly {
-      isbn10b := mload(add(isbn10, 32))
-      isbn13b := mload(add(isbn13, 32))
-    }
-
-    require(entityMapping[isbn13b].isbn13 == 0x0);
+    require(priceInRubles > 0);
 
     IsbnEntity memory newBook = IsbnEntity({
-      fullTitle: fullTitle,
-      isbn10: isbn10b,
-      isbn13: isbn13b,
-      publisher: publisher,
+      title: title,
+      isbn10: stringToBytes32(isbn10),
+      isbn13: stringToBytes32(isbn13),
       edition: uint(edition),
       publishDate: publishDate,
       bindingWithBook: uint(bindingWithBook),
-      width: width,
-      height: height,
-      depth: depth,
-      overview: overview
+      priceInRubles: priceInRubles,
+      deleted: false
     });
 
-    isbnIndexMapping[indexId] = isbn13b;
-    entityMapping[isbn13b] = newBook;
+    entityMapping[commonIndexId] = newBook;
 
-    indexId += 1;
-    itemsCount += 1;
+    commonIndexId += 1;
   }
 
-  function deleteBookFromRegistry(bytes32 isbn13) public {
+  function setBookDimensions(uint id, uint width, uint height, uint depth) public {
+    require(editorMapping[msg.sender]);
+    require(entityMapping[id].isbn13 != 0x0);
+    require(width > 0 && height > 0 && depth > 0);
+
+    Dimensions memory newDimensions = Dimensions({
+      width: width,
+      height: height,
+      depth: depth
+    });
+
+    dimensionsMapping[id] = newDimensions;
+  }
+
+  function setBookAdditionalInfo(uint id, bytes32 author, string description) public {
+    require(editorMapping[msg.sender]);
+    require(entityMapping[id].isbn13 != 0x0);
+
+    AdditionalInfo memory newInfo = AdditionalInfo({
+      author: author,
+      description: description
+    });
+
+    additionalInfoMapping[id] = newInfo;
+  }
+
+  function updateBook(
+    uint id,
+    bytes32 title,
+    string isbn10,
+    string isbn13,
+    EditionType edition,
+    bytes32 publishDate,
+    BindingBookType bindingWithBook,
+    uint priceInRubles) public
+  {
     require(editorMapping[msg.sender]);
 
-    if (itemsCount == 0) {
-      return;
-    }
+    IsbnEntity memory changedBook = entityMapping[id];
 
-    for (uint i = 0; i < indexId; i++) {
-      if (isbnIndexMapping[i] == isbn13) {
-        delete isbnIndexMapping[i];
-        delete entityMapping[isbn13];
-        itemsCount -= 1;
+    require(changedBook.isbn13 != 0x0);
+    require(bytes(isbn10).length == 10 && bytes(isbn13).length == 13);
+    require(priceInRubles > 0);
 
-        break;
-      }
-    }
+    IsbnEntity memory newBook = IsbnEntity({
+      title: title,
+      isbn10: stringToBytes32(isbn10),
+      isbn13: stringToBytes32(isbn13),
+      edition: uint(edition),
+      publishDate: publishDate,
+      bindingWithBook: uint(bindingWithBook),
+      priceInRubles: priceInRubles,
+      deleted: changedBook.deleted
+    });
+
+    entityMapping[id] = newBook;
   }
 
-  function getAllStoredIsbns() public view returns(bytes32[]) {
-    bytes32[] memory result = new bytes32[](itemsCount);
+  function deleteBookFromRegistry(uint id) public {
+    require(editorMapping[msg.sender]);
+    require(entityMapping[id].isbn13 != 0x0);
 
-    for (uint i = 0; i < indexId; i++) {
-      if (isbnIndexMapping[i] != 0x0) {
-        result[i] = isbnIndexMapping[i];
-      }
+    entityMapping[id].deleted = true;
+  }
+
+  function getAllIsbn13() public view returns(bytes32[]) {
+    bytes32[] memory result = new bytes32[](commonIndexId);
+
+    for(uint i = 0; i < commonIndexId; i++) {
+      result[i] = entityMapping[i].isbn13;
     }
 
     return result;
+  }
+
+  function stringToBytes32(string source) private pure returns(bytes32 result) {
+    assembly {
+      result := mload(add(source, 32))
+    }
   }
 }
