@@ -17,7 +17,7 @@ class CreateBookEdition < ApplicationForm
   attribute :width, Integer
   attribute :depth, Integer
 
-  validates :title, :isbn10, :isbn13, :edition, :binding, presence: true
+  validates :title, :isbn10, :isbn13, presence: true
   validates :deleted, inclusion: { in: [true, false] }
   validates :isbn10, length: { is: 10 }
   validates :isbn13, length: { is: 13 }

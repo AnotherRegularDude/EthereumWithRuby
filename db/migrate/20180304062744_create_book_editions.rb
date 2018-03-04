@@ -4,8 +4,9 @@ class CreateBookEditions < ActiveRecord::Migration[5.1]
       t.text :title, null: false
       t.text :isbn10, null: false
       t.text :isbn13, null: false
-      t.integer :edition, null: false
-      t.integer :binding, null: false
+
+      t.integer :edition
+      t.integer :binding
 
       t.text :author
       t.text :description

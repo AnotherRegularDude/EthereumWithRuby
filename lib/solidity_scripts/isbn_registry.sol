@@ -1,46 +1,37 @@
 pragma solidity ^0.4.2;
 
 contract IsbnRegistry {
-  enum EditionType { Reprint, Slp, Special, Rehearsal, ScriptEd, Anniversary, Reissue, Unabridged }
-  enum BindingBookType { Hardcover, Paperbound, VHS, Laserdisc, EBook }
-
-  struct IsbnEntity {
+  struct BookEdition {
     bytes32 title;
     bytes32 isbn10;
     bytes32 isbn13;
-    uint edition;
-    uint binding;
-    bool deleted;
-  }
-
-  struct Dimensions {
+    bytes32 author;
+    bytes32 publishDate;
+    uint8 edition;
+    uint8 binding;
+    uint price;
     uint width;
     uint height;
     uint depth;
-  }
-
-  struct AdditionalInfo {
-    bytes32 author;
     string description;
-    bytes32 publishDate;
-    uint priceInRubles;
+    bool deleted;
   }
 
   address public owner;
-  uint public commonIndexId;
+  uint public index;
 
-  mapping(uint => IsbnEntity) public entityMapping;
-  mapping(uint => Dimensions) public dimensionsMapping;
-  mapping(uint => AdditionalInfo) public additionalInfoMapping;
-
+  // Show
+  mapping(uint => BookEdition) public bookEditions;
   mapping(address => bool) public editorMapping;
 
   function IsbnRegistry() public {
     owner = msg.sender;
-    commonIndexId = 0;
+    index = 0;
 
     editorMapping[owner] = true;
   }
+
+  event BookEditionChanged(uint id, bytes32 eventName);
 
   // Manage addresses, that cat edit registry items.
   function addEditorAddress(address newEditor) public {
@@ -55,106 +46,59 @@ contract IsbnRegistry {
     delete editorMapping[deletedEditor];
   }
 
-  // Manage registry items.
-  function addBook(
-    bytes32 title,
-    string isbn10,
-    string isbn13,
-    EditionType edition,
-    BindingBookType binding) public
-  {
+  // Create
+  function addBookEdition(bytes32 title, string isbn10, string isbn13) public {
     require(editorMapping[msg.sender]);
     require(bytes(isbn10).length == 10 && bytes(isbn13).length == 13);
     require(title != 0x0);
 
-    IsbnEntity memory newBook = IsbnEntity({
-      title: title,
-      isbn10: stringToBytes32(isbn10),
-      isbn13: stringToBytes32(isbn13),
-      edition: uint(edition),
-      binding: uint(binding),
-      deleted: false
-    });
+    bookEditions[index].title = title;
+    bookEditions[index].isbn10 = stringToBytes32(isbn10);
+    bookEditions[index].isbn13 = stringToBytes32(isbn13);
+    bookEditions[index].deleted = false;
 
-    entityMapping[commonIndexId] = newBook;
-
-    commonIndexId += 1;
+    BookEditionChanged(index, 'added');
+    index += 1;
   }
 
-  function setBookDimensions(uint id, uint height, uint width, uint depth) public {
-    require(editorMapping[msg.sender]);
-    require(entityMapping[id].isbn13 != 0x0);
-    require(width > 0 && height > 0 && depth > 0);
-
-    Dimensions memory newDimensions = Dimensions({
-      width: width,
-      height: height,
-      depth: depth
-    });
-
-    dimensionsMapping[id] = newDimensions;
-  }
-
-  function setBookAdditionalInfo(
-    uint id, bytes32 author, bytes32 publishDate, uint priceInRubles, string description) public
-  {
-    require(editorMapping[msg.sender]);
-    require(entityMapping[id].isbn13 != 0x0);
-    require(priceInRubles > 0);
-
-    AdditionalInfo memory newInfo = AdditionalInfo({
-      author: author,
-      publishDate: publishDate,
-      priceInRubles: priceInRubles,
-      description: description
-    });
-
-    additionalInfoMapping[id] = newInfo;
-  }
-
-  function updateBook(
+  // Update
+  function updateBookEdition(
     uint id,
-    bytes32 title,
-    string isbn10,
-    string isbn13,
-    EditionType edition,
-    BindingBookType binding) public
+    bytes32 author,
+    bytes32 publishDate,
+    uint8 edition,
+    uint8 binding,
+    uint price,
+    uint width,
+    uint height,
+    uint depth,
+    string description) public
   {
     require(editorMapping[msg.sender]);
+    require(bookEditions[id].isbn13 != 0x0);
+    require(bookEditions[id].deleted == false);
 
-    IsbnEntity memory changedBook = entityMapping[id];
+    bookEditions[id].author = author;
+    bookEditions[id].publishDate = publishDate;
+    bookEditions[id].edition = edition;
+    bookEditions[id].binding = binding;
+    bookEditions[id].price = price;
+    bookEditions[id].width = width;
+    bookEditions[id].height = height;
+    bookEditions[id].depth = depth;
+    bookEditions[id].description = description;
 
-    require(changedBook.isbn13 != 0x0);
-    require(bytes(isbn10).length == 10 && bytes(isbn13).length == 13);
-    require(title != 0x0);
-
-    IsbnEntity memory newBook = IsbnEntity({
-      title: title,
-      isbn10: stringToBytes32(isbn10),
-      isbn13: stringToBytes32(isbn13),
-      edition: uint(edition),
-      binding: uint(binding),
-      deleted: changedBook.deleted
-    });
-
-    entityMapping[id] = newBook;
+    BookEditionChanged(id, 'updated');
   }
 
-  function deleteBookFromRegistry(uint id) public {
+  // Delete
+  function deleteBookEdition(uint id) public {
     require(editorMapping[msg.sender]);
-    require(entityMapping[id].isbn13 != 0x0);
+    require(bookEditions[id].isbn13 != 0x0);
 
-    entityMapping[id].deleted = true;
-  }
+    bookEditions[id].deleted = true;
 
-  function getAllIsbn13() public view returns(bytes32[]) {
-    bytes32[] memory result = new bytes32[](commonIndexId);
-
-    for(uint i = 0; i < commonIndexId; i++) {
-      result[i] = entityMapping[i].isbn13;
-    }
-
-    return result;
+    BookEditionChanged(id, 'deleted');
   }
 
   function stringToBytes32(string source) private pure returns(bytes32 result) {
