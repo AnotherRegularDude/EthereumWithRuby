@@ -11,7 +11,7 @@ describe CreateBookEdition do
   end
 
   context 'with minimum of correct data' do
-    let(:data) { build(:book_edition).attributes.slice('title', 'isbn10', 'isbn13', 'edition', 'binding', 'deleted') }
+    let(:data) { build(:book_edition).attributes.slice('title', 'isbn10', 'isbn13', 'deleted') }
 
     it { expect(new_form.save).to be true }
     it { expect(saved_form.book_edition).to be_an_instance_of(BookEdition) }
