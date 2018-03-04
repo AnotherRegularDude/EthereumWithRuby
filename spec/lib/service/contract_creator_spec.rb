@@ -7,14 +7,14 @@ describe ContractCreator do
   let(:greeter_message) { 'Message' }
   let(:greeter_contract) do
     subject.call(
-      path_to_cotract: path_to_script('greeter'),
+      path_to_contract: path_to_script('greeter'),
       args_for_contract: greeter_message
     )
   end
 
   let(:storage_number) { rand(1..100) }
   let(:storage_contract) do
-    subject.call(path_to_cotract: path_to_script('simple_storage'))
+    subject.call(path_to_contract: path_to_script('simple_storage'))
   end
 
   before do
