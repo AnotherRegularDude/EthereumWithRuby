@@ -20,21 +20,19 @@ namespace :contract do
   end
 
   namespace :import do
-    desc 'Import all IsbnRegistry data to database'
-    task all_isbn_registry: :environment do
-      if BookEdition.maximum(:contract_link).zero?
-        contract = AppContractHolder.instance.isbn_contract
-        BookEdition.connection.transaction do
-          contract.call.index.times do |id|
-            data = ContractDataMapper.call(contract: contract, constant_name: 'bookEditions', id: id)
-            form = CreateBookEditionForm.new(data.merge(contract_link: id))
+    desc 'Import IsbnRegistry data to database'
+    task isbn_registy: :environment do
+      contract = AppContractHolder.instance.isbn_contract
+      puts 'Start importing (may take some time)'
 
-            form.save
-          end
-        end
-      else
-        puts 'Database not empty, import already runned...'
-      end
+      RegistryImporter.call(
+        contract: contract,
+        mapper_name: 'bookEditions',
+        import_model: BookEdition,
+        creation_form: CreateBookEditionForm
+      )
+
+      puts 'Imported'
     end
   end
 end

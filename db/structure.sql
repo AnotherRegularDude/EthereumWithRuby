@@ -3,6 +3,7 @@ SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET row_security = off;
@@ -35,8 +36,6 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 
-SET search_path = public, pg_catalog;
-
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -45,7 +44,7 @@ SET default_with_oids = false;
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE ar_internal_metadata (
+CREATE TABLE public.ar_internal_metadata (
     key character varying NOT NULL,
     value character varying,
     created_at timestamp without time zone NOT NULL,
@@ -57,9 +56,9 @@ CREATE TABLE ar_internal_metadata (
 -- Name: book_editions; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE book_editions (
+CREATE TABLE public.book_editions (
     id bigint NOT NULL,
-    contract_link integer NOT NULL,
+    external_contract_id integer NOT NULL,
     title text NOT NULL,
     isbn10 text NOT NULL,
     isbn13 text NOT NULL,
@@ -82,7 +81,7 @@ CREATE TABLE book_editions (
 -- Name: book_editions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE book_editions_id_seq
+CREATE SEQUENCE public.book_editions_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -94,14 +93,14 @@ CREATE SEQUENCE book_editions_id_seq
 -- Name: book_editions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE book_editions_id_seq OWNED BY book_editions.id;
+ALTER SEQUENCE public.book_editions_id_seq OWNED BY public.book_editions.id;
 
 
 --
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE schema_migrations (
+CREATE TABLE public.schema_migrations (
     version character varying NOT NULL
 );
 
@@ -110,14 +109,14 @@ CREATE TABLE schema_migrations (
 -- Name: book_editions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY book_editions ALTER COLUMN id SET DEFAULT nextval('book_editions_id_seq'::regclass);
+ALTER TABLE ONLY public.book_editions ALTER COLUMN id SET DEFAULT nextval('public.book_editions_id_seq'::regclass);
 
 
 --
 -- Name: ar_internal_metadata ar_internal_metadata_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY ar_internal_metadata
+ALTER TABLE ONLY public.ar_internal_metadata
     ADD CONSTRAINT ar_internal_metadata_pkey PRIMARY KEY (key);
 
 
@@ -125,7 +124,7 @@ ALTER TABLE ONLY ar_internal_metadata
 -- Name: book_editions book_editions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY book_editions
+ALTER TABLE ONLY public.book_editions
     ADD CONSTRAINT book_editions_pkey PRIMARY KEY (id);
 
 
@@ -133,7 +132,7 @@ ALTER TABLE ONLY book_editions
 -- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY schema_migrations
+ALTER TABLE ONLY public.schema_migrations
     ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
 
 
@@ -141,42 +140,42 @@ ALTER TABLE ONLY schema_migrations
 -- Name: index_book_editions_on_author; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_book_editions_on_author ON book_editions USING btree (author);
-
-
---
--- Name: index_book_editions_on_contract_link; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX index_book_editions_on_contract_link ON book_editions USING btree (contract_link);
+CREATE INDEX index_book_editions_on_author ON public.book_editions USING btree (author);
 
 
 --
 -- Name: index_book_editions_on_description; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_book_editions_on_description ON book_editions USING btree (description);
+CREATE INDEX index_book_editions_on_description ON public.book_editions USING btree (description);
 
 
 --
--- Name: index_book_editions_on_isbn10_and_isbn13; Type: INDEX; Schema: public; Owner: -
+-- Name: index_book_editions_on_external_contract_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_book_editions_on_isbn10_and_isbn13 ON book_editions USING btree (isbn10, isbn13);
+CREATE UNIQUE INDEX index_book_editions_on_external_contract_id ON public.book_editions USING btree (external_contract_id);
+
+
+--
+-- Name: index_book_editions_on_isbn10; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_book_editions_on_isbn10 ON public.book_editions USING btree (isbn10);
 
 
 --
 -- Name: index_book_editions_on_isbn13; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_book_editions_on_isbn13 ON book_editions USING btree (isbn13);
+CREATE INDEX index_book_editions_on_isbn13 ON public.book_editions USING btree (isbn13);
 
 
 --
 -- Name: index_book_editions_on_title; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_book_editions_on_title ON book_editions USING btree (title);
+CREATE INDEX index_book_editions_on_title ON public.book_editions USING btree (title);
 
 
 --

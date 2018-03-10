@@ -1,7 +1,7 @@
 class CreateBookEditions < ActiveRecord::Migration[5.1]
   def change
     create_table :book_editions do |t|
-      t.integer :contract_link, null: false
+      t.integer :external_contract_id, null: false
 
       t.text :title, null: false
       t.text :isbn10, null: false
@@ -24,12 +24,12 @@ class CreateBookEditions < ActiveRecord::Migration[5.1]
       t.timestamps
     end
 
-    add_index(:book_editions, :contract_link, unique: true)
+    add_index(:book_editions, :external_contract_id, unique: true)
     add_index(:book_editions, :title)
     add_index(:book_editions, :author)
     add_index(:book_editions, :description)
 
-    add_index(:book_editions, %i[isbn10 isbn13])
+    add_index(:book_editions, :isbn10)
     add_index(:book_editions, :isbn13)
   end
 end

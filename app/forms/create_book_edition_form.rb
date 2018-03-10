@@ -4,7 +4,7 @@ class CreateBookEditionForm < ApplicationForm
   attribute :title, String
   attribute :isbn10, String
   attribute :isbn13, String
-  attribute :contract_link, Integer
+  attribute :external_contract_id, Integer
   attribute :edition, Integer
   attribute :binding, Integer
   attribute :deleted, Boolean
@@ -18,7 +18,7 @@ class CreateBookEditionForm < ApplicationForm
   attribute :width, Integer
   attribute :depth, Integer
 
-  validates :title, :isbn10, :isbn13, :contract_link, presence: true
+  validates :title, :isbn10, :isbn13, :external_contract_id, presence: true
   validates :deleted, inclusion: { in: [true, false] }
   validates :isbn10, length: { is: 10 }
   validates :isbn13, length: { is: 13 }
