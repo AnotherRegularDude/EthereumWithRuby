@@ -5,6 +5,7 @@ FactoryBot.define do
     isbn13 { Faker::Number.unique.number(13) }
     edition { Faker::Number.between(0, 7) }
     binding { Faker::Number.between(0, 4) }
+    contract_link { Faker::Number.unique.number }
     deleted false
 
     trait :full_info do

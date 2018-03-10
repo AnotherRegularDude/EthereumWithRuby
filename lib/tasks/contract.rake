@@ -8,4 +8,14 @@ namespace :contract do
     puts "Contract address: #{contract.address}"
     puts "Contract path: #{contract_info.file_path}"
   end
+
+  desc 'Seed IsbnRegistry contract with entities'
+  task :seed_isbn_registry, [:number_of_tries] => :environment do |t, args|
+    contract = AppContractHolder.instance.isbn_contract
+    number_of_tries = args[:number_of_tries]
+    id_before = contract.call.index
+    ContractIsbnRegistrySeeder.call(contract: contract, entity_count: number_of_tries)
+
+    puts "Created #{contract.call.index - id_before} entities in IsbnRegistry."
+  end
 end
