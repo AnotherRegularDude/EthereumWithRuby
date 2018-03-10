@@ -24,6 +24,8 @@ contract IsbnRegistry {
   mapping(uint => BookEdition) public bookEditions;
   mapping(address => bool) public editorMapping;
 
+  event BookEditionChanged(uint id, address changer);
+
   function IsbnRegistry() public {
     owner = msg.sender;
     index = 0;
@@ -85,6 +87,8 @@ contract IsbnRegistry {
     bookEditions[id].height = height;
     bookEditions[id].depth = depth;
     bookEditions[id].description = description;
+
+    BookEditionChanged(id, msg.sender);
   }
 
   function updateIsbnInfoInBook(uint id, string isbn10, string isbn13) public {
@@ -95,6 +99,8 @@ contract IsbnRegistry {
 
     bookEditions[id].isbn10 = stringToBytes32(isbn10);
     bookEditions[id].isbn13 = stringToBytes32(isbn13);
+
+    BookEditionChanged(id, msg.sender);
   }
 
   function updateTitleInBook(uint id, bytes32 title) public {
@@ -103,6 +109,8 @@ contract IsbnRegistry {
     require(bookEditions[id].deleted == false);
 
     bookEditions[id].title = title;
+
+    BookEditionChanged(id, msg.sender);
   }
 
   // Delete
@@ -111,6 +119,8 @@ contract IsbnRegistry {
     require(bookEditions[id].isbn13 != 0x0);
 
     bookEditions[id].deleted = true;
+
+    BookEditionChanged(id, msg.sender);
   }
 
   function stringToBytes32(string source) private pure returns(bytes32 result) {

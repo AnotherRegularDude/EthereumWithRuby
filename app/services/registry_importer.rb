@@ -8,6 +8,9 @@ class RegistryImporter < ApplicationService
   end
 
   def call
+    init_redis_store
+    write_contract_cache
+
     start_id = (@import_model.maximum('external_contract_id') || -1) + 1
     end_id = @contract.call.index
 
@@ -19,5 +22,15 @@ class RegistryImporter < ApplicationService
         form.save
       end
     end
+  end
+
+  private
+
+  def process_redis_cache
+    conf = Rails.configuration.x.redis
+    block_number = Ethereum::Singleton.instance.eth_block_number['result'].to_i(16)
+
+    redis = ActiveSupport::Cache.lookup_store :redis_store, conf.connection_string, conf.namespace
+    redis.write(:last_watched_block, block_number)
   end
 end

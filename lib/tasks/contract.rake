@@ -21,7 +21,7 @@ namespace :contract do
 
   namespace :import do
     desc 'Import IsbnRegistry data to database'
-    task isbn_registy: :environment do
+    task isbn_registry: :environment do
       contract = AppContractHolder.instance.isbn_contract
       puts 'Start importing (may take some time)'
 
