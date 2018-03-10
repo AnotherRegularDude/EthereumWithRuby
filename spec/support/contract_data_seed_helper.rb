@@ -1,14 +1,14 @@
 module ContractDataSeedHelper
-  def seed_isbn_contract(contract, repeat = 100)
+  def seed_isbn_contract(contract, repeat = 20)
     repeat.times do
       data = create(:book_edition, :full_info).attributes
       mutate_data!(data)
 
-      id = contract.call.common_index_id
+      id = contract.call.index
+      creation_data = data.values_at('title', 'isbn10', 'isbn13')
 
-      contract.transact_and_wait.add_book(*data.values_at('title', 'isbn10', 'isbn13', 'edition', 'binding'))
-      contract.transact_and_wait.set_book_additional_info(id, *data.values_at('author', 'publish_date', 'price', 'description'))
-      contract.transact_and_wait.set_book_dimensions(id, *data.values_at('height', 'width', 'depth'))
+      contract.transact_and_wait.add_book(creation_data)
+      contract.transact_and_wait.update_book_edition(id, *(data - creation_data).except('created_at', 'updated_at'))
     end
   end
 

@@ -59,6 +59,7 @@ CREATE TABLE ar_internal_metadata (
 
 CREATE TABLE book_editions (
     id bigint NOT NULL,
+    contract_link integer NOT NULL,
     title text NOT NULL,
     isbn10 text NOT NULL,
     isbn13 text NOT NULL,
@@ -141,6 +142,13 @@ ALTER TABLE ONLY schema_migrations
 --
 
 CREATE INDEX index_book_editions_on_author ON book_editions USING btree (author);
+
+
+--
+-- Name: index_book_editions_on_contract_link; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_book_editions_on_contract_link ON book_editions USING btree (contract_link);
 
 
 --

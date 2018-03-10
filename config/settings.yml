@@ -1,2 +1,6 @@
 rpc_client:
   url: <%= ENV['RPC_HOST'] %>
+contracts:
+  isbn_registry:
+    file_path: <%= Rails.root.join('lib', 'solidity_scripts', 'isbn_registry.sol') %>
+    address: '<%= ENV['ISBN_REGISTRY_ADDRESS'] %>'

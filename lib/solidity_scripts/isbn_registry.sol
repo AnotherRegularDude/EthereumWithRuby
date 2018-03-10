@@ -61,7 +61,7 @@ contract IsbnRegistry {
     index += 1;
   }
 
-  // Update
+  // Full Update.
   function updateBookEdition(
     uint id,
     bytes32 author,
@@ -87,6 +87,28 @@ contract IsbnRegistry {
     bookEditions[id].height = height;
     bookEditions[id].depth = depth;
     bookEditions[id].description = description;
+
+    BookEditionChanged(id, 'updated');
+  }
+
+  function updateIsbnInfoInBook(uint id, string isbn10, string isbn13) public {
+    require(editorMapping[msg.sender]);
+    require(bookEditions[id].isbn13 != 0x0);
+    require(bookEditions[id].deleted == false);
+    require(bytes(isbn10).length == 10 && bytes(isbn13).length == 13);
+
+    bookEditions[id].isbn10 = stringToBytes32(isbn10);
+    bookEditions[id].isbn13 = stringToBytes32(isbn13);
+
+    BookEditionChanged(id, 'updated');
+  }
+
+  function updateTitleInBook(uint id, bytes32 title) public {
+    require(editorMapping[msg.sender]);
+    require(bookEditions[id].isbn13 != 0x0);
+    require(bookEditions[id].deleted == false);
+
+    bookEditions[id].title = title;
 
     BookEditionChanged(id, 'updated');
   }
