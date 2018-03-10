@@ -31,7 +31,6 @@ contract IsbnRegistry {
     editorMapping[owner] = true;
   }
 
-  event BookEditionChanged(uint id, bytes32 eventName);
 
   // Manage addresses, that cat edit registry items.
   function addEditorAddress(address newEditor) public {
@@ -57,7 +56,6 @@ contract IsbnRegistry {
     bookEditions[index].isbn13 = stringToBytes32(isbn13);
     bookEditions[index].deleted = false;
 
-    BookEditionChanged(index, 'added');
     index += 1;
   }
 
@@ -87,8 +85,6 @@ contract IsbnRegistry {
     bookEditions[id].height = height;
     bookEditions[id].depth = depth;
     bookEditions[id].description = description;
-
-    BookEditionChanged(id, 'updated');
   }
 
   function updateIsbnInfoInBook(uint id, string isbn10, string isbn13) public {
@@ -99,8 +95,6 @@ contract IsbnRegistry {
 
     bookEditions[id].isbn10 = stringToBytes32(isbn10);
     bookEditions[id].isbn13 = stringToBytes32(isbn13);
-
-    BookEditionChanged(id, 'updated');
   }
 
   function updateTitleInBook(uint id, bytes32 title) public {
@@ -109,8 +103,6 @@ contract IsbnRegistry {
     require(bookEditions[id].deleted == false);
 
     bookEditions[id].title = title;
-
-    BookEditionChanged(id, 'updated');
   }
 
   // Delete
@@ -119,8 +111,6 @@ contract IsbnRegistry {
     require(bookEditions[id].isbn13 != 0x0);
 
     bookEditions[id].deleted = true;
-
-    BookEditionChanged(id, 'deleted');
   }
 
   function stringToBytes32(string source) private pure returns(bytes32 result) {

@@ -1,4 +1,4 @@
-class CreateBookEdition < ApplicationForm
+class CreateBookEditionForm < ApplicationForm
   attr_reader :book_edition
 
   attribute :title, String
@@ -29,6 +29,6 @@ class CreateBookEdition < ApplicationForm
   def persist!
     @book_edition = BookEdition.create!(attributes)
   rescue ActiveRecord::RecordInvalid => invalid
-    self.errors = invalid.errors
+    @errors = invalid.record.errors
   end
 end
