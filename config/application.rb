@@ -19,9 +19,10 @@ module PlayEthereumWithRuby
     config.available_locales = %i[en ru]
     config.default_locale = :en
 
-    config.cache_store = :redis_store, 'redis://redis:6379/0/cache', { expires_in: 90.minutes }
-
     config.x = Hashie::Mash.new YAML.safe_load(ERB.new(File.read(Rails.root.join('config', 'settings.yml'))).result)
+
+    config.cache_store = :redis_store, "#{config.x.redis.connection_string}/cache", { expires_in: 90.minutes }
+
 
     config.middleware.insert_before 0, Rack::Cors do
       allow do

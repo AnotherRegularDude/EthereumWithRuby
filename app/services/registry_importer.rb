@@ -8,8 +8,7 @@ class RegistryImporter < ApplicationService
   end
 
   def call
-    init_redis_store
-    write_contract_cache
+    process_redis_cache
 
     start_id = (@import_model.maximum('external_contract_id') || -1) + 1
     end_id = @contract.call.index

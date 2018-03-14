@@ -1,6 +1,5 @@
 redis:
   connection_string: <%= ENV['REDIS_CONNECTION_STRING'] %>
-  namespace: EthereumCache
 rpc_client:
   url: <%= ENV['RPC_HOST'] %>
 contracts:
