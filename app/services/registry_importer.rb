@@ -29,7 +29,7 @@ class RegistryImporter < ApplicationService
     conf = Rails.configuration.x.redis
     block_number = Ethereum::Singleton.instance.eth_block_number['result'].to_i(16)
 
-    redis = ActiveSupport::Cache.lookup_store :redis_store, conf.connection_string, conf.namespace
+    redis = ActiveSupport::Cache.lookup_store :redis_cache_store, url: conf.connection_string
     redis.write(:last_watched_block, block_number)
   end
 end
