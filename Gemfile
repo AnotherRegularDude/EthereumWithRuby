@@ -6,6 +6,7 @@ git_source(:github) do |repo_name|
 end
 
 gem 'bcrypt', '~> 3.1.7'
+gem 'bootsnap', require: false
 gem 'ethereum.rb'
 gem 'faker'
 gem 'hashie'
@@ -13,7 +14,7 @@ gem 'oj'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 3.7'
 gem 'rack-cors', require: 'rack/cors'
-gem 'rails', '~> 5.1.5'
+gem 'rails', '~> 5.2.0'
 gem 'redis-rails'
 gem 'virtus'
 
