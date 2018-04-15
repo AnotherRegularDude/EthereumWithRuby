@@ -1,22 +1,16 @@
 pragma solidity ^0.4.2;
 
 contract IsbnRegistry {
-  struct IsbnNumber {
-    uint16 ean;
-    uint16 group;
-    uint16 publisher;
-    uint16 title;
-    uint16 checkDigit;
-  }
+  enum EventType { Added, Removed }
 
   struct BookEdition {
     bytes32 title;
     bytes32 author;
-    bytes32 publishDate;
-    uint isbn10;
-    uint isbn13;
-    uint8 edition;
-    uint8 binding;
+    bytes32 isbn10;
+    bytes32 isbn13;
+    uint publishDate;
+    uint edition;
+    uint binding;
     uint price;
     uint width;
     uint height;
@@ -25,13 +19,13 @@ contract IsbnRegistry {
     bool removed;
   }
 
-  IsbnNumber[] private isbnNumbers;
+  address constant dateTimeAddress = 0x667aB580676fD430AF36f570119BE4f783093876;
 
   address public owner;
   BookEdition[] public bookEditions;
   mapping(address => bool) public editorMapping;
 
-  event BookEditionChanged(uint id, address changer);
+  event RegistryChanged(uint id, EventType action, address changer);
 
   function IsbnRegistry() public {
     owner = msg.sender;
@@ -40,7 +34,7 @@ contract IsbnRegistry {
   }
 
   function bookEditionsCount() public view returns(uint) {
-    return isbnNumbers.length;
+    return bookEditions.length;
   }
 
 
@@ -57,140 +51,62 @@ contract IsbnRegistry {
     delete editorMapping[deletedEditor];
   }
 
-  function addIsbnItem(uint16[] isbnArgs) public {
-    require(checkIsbn(isbnArgs));
+  function addBookEdition(bytes32[] stringArgs, uint[] intArgs, string description) public {
+    require(stringArgs.length == 4 && intArgs.length == 7);
+    require(checkIsbn10(stringArgs[2]));
 
-    isbnNumbers.push(IsbnNumber({
-      ean: isbnArgs[0],
-      group: 0,
-      publisher: 0,
-      title: 0,
-      checkDigit: 0
+    bookEditions.push(BookEdition({
+      title: stringArgs[0],
+      author: stringArgs[1],
+      isbn10: stringArgs[2],
+      isbn13: stringArgs[3],
+      publishDate: intArgs[0],
+      edition: intArgs[1],
+      binding: intArgs[2],
+      price: intArgs[3],
+      width: intArgs[4],
+      height: intArgs[5],
+      depth: intArgs[6],
+      description: description,
+      removed: false
     }));
+
+    emit RegistryChanged(bookEditions.length - 1, EventType.Added, msg.sender);
   }
 
-  function checkIsbn(uint16[] isbnArgs) private pure returns(bool result) {
-    result = true;
-    if (isbnArgs.length != 4 && isbnArgs.length != 5)
-      return false;
+  function markRemovedBookEdition(uint index) public {
+    require(bookEditions.length > index);
+    require(!bookEditions[index].removed);
 
-    uint numbersCount = 0;
-    uint resultSum = 0;
+    bookEditions[index].removed = true;
 
-    uint i;
-    uint16 tempNumber;
+    emit RegistryChanged(index, EventType.Removed, msg.sender);
+  }
 
-    if (isbnArgs.length == 4) {
-      for(i = isbnArgs.length - 1; i >= 0; i--) {
-        tempNumber = isbnArgs[i];
-        while (tempNumber > 0) {
-          numbersCount += 1;
-          resultSum += numbersCount * (tempNumber % 10);
-          tempNumber /= 10;
-        }
-      }
+  function checkIsbn10(bytes32 isbn10) public pure returns(bool) {
+    if (getLengthOfBytesLine(isbn10) != 10) return false;
 
-      if (numbersCount != 10 || resultSum % 11 != 0)
-        result = false;
-    } else {
-      for(i = isbnArgs.length - 1; i >= 0; i--) {
-        tempNumber = isbnArgs[i];
-        while (tempNumber > 0) {
-          numbersCount += 1;
+    uint finalSum = 0;
+    for (uint i = 0; i <= 9; i++) {
+      finalSum += getNumberFromByte(isbn10[i]) * (10 - i);
+    }
 
-          if (numbersCount % 2 == 0) {
-            resultSum += 3 * (tempNumber % 10);
-          } else {
-            resultSum += tempNumber % 10;
-          }
+    return (finalSum % 11 == 0);
+  }
 
-          tempNumber /= 10;
-        }
-      }
+  function getNumberFromByte(bytes1 numberInLine) public pure returns(uint) {
+    bytes1 zeroInLine = "0";
 
-      if (numbersCount != 13 || resultSum % 10 != 0)
-        result = false;
+    return uint(numberInLine[0]) - uint(zeroInLine[0]);
+  }
+
+  function getLengthOfBytesLine(bytes32 line) private pure returns(uint result) {
+    result = 0;
+
+    for (uint i = 0; i < 32; i++) {
+      if (line[i] == 0) return;
+
+      result++;
     }
   }
-  // Create
-  // function addBookEdition(bytes32 title, string isbn10, string isbn13) public {
-  //   require(editorMapping[msg.sender]);
-  //   require(bytes(isbn10).length == 10 && bytes(isbn13).length == 13);
-  //   require(title != 0x0);
-
-  //   bookEditions[index].title = title;
-  //   bookEditions[index].isbn10 = stringToBytes32(isbn10);
-  //   bookEditions[index].isbn13 = stringToBytes32(isbn13);
-  //   bookEditions[index].deleted = false;
-
-  //   index += 1;
-  // }
-
-  // // Full Update, will remove soon.
-  // function updateBookEdition(
-  //   uint id,
-  //   bytes32 author,
-  //   bytes32 publishDate,
-  //   uint8 edition,
-  //   uint8 binding,
-  //   uint price,
-  //   uint width,
-  //   uint height,
-  //   uint depth,
-  //   string description) public
-  // {
-  //   require(editorMapping[msg.sender]);
-  //   require(bookEditions[id].isbn13 != 0x0);
-  //   require(bookEditions[id].deleted == false);
-
-  //   bookEditions[id].author = author;
-  //   bookEditions[id].publishDate = publishDate;
-  //   bookEditions[id].edition = edition;
-  //   bookEditions[id].binding = binding;
-  //   bookEditions[id].price = price;
-  //   bookEditions[id].width = width;
-  //   bookEditions[id].height = height;
-  //   bookEditions[id].depth = depth;
-  //   bookEditions[id].description = description;
-
-  //   BookEditionChanged(id, msg.sender);
-  // }
-
-  // function updateIsbnInfoInBook(uint id, string isbn10, string isbn13) public {
-  //   require(editorMapping[msg.sender]);
-  //   require(bookEditions[id].isbn13 != 0x0);
-  //   require(bookEditions[id].deleted == false);
-  //   require(bytes(isbn10).length == 10 && bytes(isbn13).length == 13);
-
-  //   bookEditions[id].isbn10 = stringToBytes32(isbn10);
-  //   bookEditions[id].isbn13 = stringToBytes32(isbn13);
-
-  //   BookEditionChanged(id, msg.sender);
-  // }
-
-  // function updateTitleInBook(uint id, bytes32 title) public {
-  //   require(editorMapping[msg.sender]);
-  //   require(bookEditions[id].isbn13 != 0x0);
-  //   require(bookEditions[id].deleted == false);
-
-  //   bookEditions[id].title = title;
-
-  //   BookEditionChanged(id, msg.sender);
-  // }
-
-  // // Delete
-  // function deleteBookEdition(uint id) public {
-  //   require(editorMapping[msg.sender]);
-  //   require(bookEditions[id].isbn13 != 0x0);
-
-  //   bookEditions[id].deleted = true;
-
-  //   BookEditionChanged(id, msg.sender);
-  // }
-
-  // function stringToBytes32(string source) private pure returns(bytes32 result) {
-  //   assembly {
-  //     result := mload(add(source, 32))
-  //   }
-  // }
 }
