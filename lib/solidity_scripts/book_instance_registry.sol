@@ -56,4 +56,35 @@ contract BookInstanceRegistry {
 
     emit RegistryChanged(bookInstances.length - 1, EventType.Added, msg.sender);
   }
+
+  function setBookReturned(uint id) public {
+    require(editorMapping[msg.sender]);
+    require(id < bookInstances.length);
+    require(bookInstances[id].state != 2);
+
+    bookInstances[id].holder = bookInstances[id].owner;
+    bookInstances[id].timeToReturn = 0;
+
+    emit RegistryChanged(id, EventType.Changed, msg.sender);
+  }
+
+  function setBookTaken(uint id, bytes32 holder, uint timeToReturn) public {
+    require(editorMapping[msg.sender]);
+    require(id < bookInstances.length);
+    require(bookInstances[id].state != 2);
+
+    bookInstances[id].holder = holder;
+    bookInstances[id].timeToReturn = timeToReturn;
+    emit RegistryChanged(id, EventType.Changed, msg.sender);
+  }
+
+  function setBookLost(uint id) public {
+    require(editorMapping[msg.sender]);
+    require(id < bookInstances.length);
+    require(bookInstances[id].state != 2);
+
+    bookInstances[id].state = 2;
+
+    emit RegistryChanged(id, EventType.Changed, msg.sender);
+  }
 }
