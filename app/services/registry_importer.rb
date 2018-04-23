@@ -1,0 +1,35 @@
+class RegistryImporter < ApplicationService
+  def initialize(contract:, mapper_name:, import_model:, creation_form:)
+    @contract = contract
+    @mapper_name = mapper_name
+
+    @import_model = import_model
+    @creation_form = creation_form
+  end
+
+  def call
+    process_redis_cache
+
+    start_id = (@import_model.maximum('external_contract_id') || -1) + 1
+    end_id = @contract.call.index
+
+    @import_model.connection.transaction do
+      (start_id...end_id).each do |id|
+        data = ContractDataMapper.call(contract: @contract, mapper_name: @mapper_name, id: id)
+        form = @creation_form.new(data.merge(external_contract_id: id))
+
+        form.save
+      end
+    end
+  end
+
+  private
+
+  def process_redis_cache
+    conf = Rails.configuration.x.redis
+    block_number = Ethereum::Singleton.instance.eth_block_number['result'].to_i(16)
+
+    redis = ActiveSupport::Cache.lookup_store :redis_cache_store, url: conf.connection_string
+    redis.write(:last_watched_block, block_number)
+  end
+end

@@ -1,0 +1,8 @@
+en:
+  contracts_rake:
+    address_info: "Contract address: %{address}"
+    path_info: "Contract path: %{file_path}"
+    start_import: Start importing (may take some time)
+    imported: Imported
+    errors:
+      no_info: No information about contract
