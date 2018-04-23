@@ -50,6 +50,7 @@ contract IsbnRegistry {
   }
 
   function addBookEdition(bytes32[] stringArgs, uint[] intArgs, string description) public {
+    require(editorMapping[msg.sender]);
     require(stringArgs.length == 4 && intArgs.length == 7);
     require(checkIsbn10(stringArgs[2]));
     require(checkIsbn13(stringArgs[3]));
@@ -74,6 +75,7 @@ contract IsbnRegistry {
   }
 
   function markRemovedBookEdition(uint index) public {
+    require(editorMapping[msg.sender]);
     require(bookEditions.length > index);
     require(!bookEditions[index].removed);
 
