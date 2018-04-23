@@ -19,8 +19,6 @@ contract IsbnRegistry {
     bool removed;
   }
 
-  address constant dateTimeAddress = 0x667aB580676fD430AF36f570119BE4f783093876;
-
   address public owner;
   BookEdition[] public bookEditions;
   mapping(address => bool) public editorMapping;
