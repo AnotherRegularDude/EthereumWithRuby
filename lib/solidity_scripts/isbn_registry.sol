@@ -54,6 +54,7 @@ contract IsbnRegistry {
   function addBookEdition(bytes32[] stringArgs, uint[] intArgs, string description) public {
     require(stringArgs.length == 4 && intArgs.length == 7);
     require(checkIsbn10(stringArgs[2]));
+    require(checkIsbn13(stringArgs[3]));
 
     bookEditions.push(BookEdition({
       title: stringArgs[0],
@@ -87,11 +88,26 @@ contract IsbnRegistry {
     if (getLengthOfBytesLine(isbn10) != 10) return false;
 
     uint finalSum = 0;
-    for (uint i = 0; i <= 9; i++) {
+    for (uint i = 0; i < 10; i++) {
       finalSum += getNumberFromByte(isbn10[i]) * (10 - i);
     }
 
     return (finalSum % 11 == 0);
+  }
+
+  function checkIsbn13(bytes32 isbn13) public pure returns(bool) {
+    if (getLengthOfBytesLine(isbn13) != 13) return false;
+
+    uint finalSum = 0;
+    for (uint i = 0; i < 13; i++) {
+      if ((i + 1) % 2 == 0) {
+        finalSum += getNumberFromByte(isbn13[i]) * 3;
+      } else {
+        finalSum += getNumberFromByte(isbn13[i]);
+      }
+    }
+
+    return (finalSum % 10 == 0);
   }
 
   function getNumberFromByte(bytes1 numberInLine) public pure returns(uint) {
