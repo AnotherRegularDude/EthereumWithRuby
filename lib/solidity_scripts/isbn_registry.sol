@@ -25,7 +25,7 @@ contract IsbnRegistry {
 
   event RegistryChanged(uint id, EventType action, address changer);
 
-  function IsbnRegistry() public {
+  constructor() {
     owner = msg.sender;
 
     editorMapping[owner] = true;

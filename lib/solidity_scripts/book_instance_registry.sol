@@ -6,8 +6,8 @@ contract BookInstanceRegistry {
   struct BookInstance {
     bytes32 isbn10;
     bytes32 isbn13;
-    bytes32 owner;
-    bytes32 holder;
+    bytes32 ownerInn;
+    bytes32 holderInn;
     uint state;
     uint timeToReturn;
   }
@@ -18,7 +18,7 @@ contract BookInstanceRegistry {
 
   event RegistryChanged(uint id, EventType action, address changer);
 
-  function BookInstanceRegistry() public {
+  constructor() {
     owner = msg.sender;
 
     editorMapping[owner] = true;
@@ -44,12 +44,13 @@ contract BookInstanceRegistry {
   function addBookInstance(bytes32[] stringArgs, uint[] intArgs) public {
     require(editorMapping[msg.sender]);
     require(stringArgs.length == 4 && intArgs.length == 2);
+    require(getLengthOfBytesLine(stringArgs[2]) == 12 && getLengthOfBytesLine(stringArgs[3]) == 12);
 
     bookInstances.push(BookInstance({
       isbn10: stringArgs[0],
       isbn13: stringArgs[1],
-      owner: stringArgs[2],
-      holder: stringArgs[3],
+      ownerInn: stringArgs[2],
+      holderInn: stringArgs[3],
       state: intArgs[0],
       timeToReturn: intArgs[1]
     }));
@@ -62,18 +63,19 @@ contract BookInstanceRegistry {
     require(id < bookInstances.length);
     require(bookInstances[id].state != 2);
 
-    bookInstances[id].holder = bookInstances[id].owner;
+    bookInstances[id].holderInn = bookInstances[id].ownerInn;
     bookInstances[id].timeToReturn = 0;
 
     emit RegistryChanged(id, EventType.Changed, msg.sender);
   }
 
-  function setBookTaken(uint id, bytes32 holder, uint timeToReturn) public {
+  function setBookTaken(uint id, bytes32 holderInn, uint timeToReturn) public {
     require(editorMapping[msg.sender]);
     require(id < bookInstances.length);
     require(bookInstances[id].state != 2);
+    require(getLengthOfBytesLine(holderInn) == 12);
 
-    bookInstances[id].holder = holder;
+    bookInstances[id].holderInn = holderInn;
     bookInstances[id].timeToReturn = timeToReturn;
     emit RegistryChanged(id, EventType.Changed, msg.sender);
   }
@@ -86,5 +88,15 @@ contract BookInstanceRegistry {
     bookInstances[id].state = 2;
 
     emit RegistryChanged(id, EventType.Changed, msg.sender);
+  }
+
+  function getLengthOfBytesLine(bytes32 line) private pure returns(uint result) {
+    result = 0;
+
+    for (uint i = 0; i < 32; i++) {
+      if (line[i] == 0) return;
+
+      result++;
+    }
   }
 }
