@@ -6,13 +6,4 @@ class ApplicationForm
   def persisted?
     false
   end
-
-  def save
-    if valid?
-      persist!
-      return true
-    end
-
-    false
-  end
 end

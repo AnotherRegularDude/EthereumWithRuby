@@ -71,7 +71,7 @@ CREATE TABLE public.book_editions (
     width integer,
     height integer,
     depth integer,
-    deleted boolean NOT NULL,
+    removed boolean NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
 );
@@ -186,6 +186,7 @@ SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20180304033703'),
-('20180304062744');
+('20180304062744'),
+('20180426115724');
 
 

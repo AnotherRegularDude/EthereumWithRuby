@@ -1,35 +1,40 @@
-class RegistryImporter < ApplicationService
-  def initialize(contract:, mapper_name:, import_model:, creation_form:)
+class RegistryImporter
+  def initialize(contract, input_name, model, form, entity_contract_name)
     @contract = contract
-    @mapper_name = mapper_name
+    @input_name = input_name
+    @inputs = EthereumTools.parse_inputs(@contract, @input_name)
 
-    @import_model = import_model
-    @creation_form = creation_form
+    @model = model
+    @form = form
+    @entity_contract_name = entity_contract_name
   end
 
   def call
-    process_redis_cache
+    blocks_result = SafeBlockManager.call(@contract)
+    return if blocks_result.blank?
 
-    start_id = (@import_model.maximum('external_contract_id') || -1) + 1
-    end_id = @contract.call.index
+    filter_id = EthereumTools.generate_filter_id(
+      @contract,
+      @input_name,
+      from_block: blocks_result[:from_block],
+      to_block: blocks_result[:last_block],
+    )
+    events = EthereumTools.events_from_filter(@contract, @input_name, filter_id)
 
-    @import_model.connection.transaction do
-      (start_id...end_id).each do |id|
-        data = ContractDataMapper.call(contract: @contract, mapper_name: @mapper_name, id: id)
-        form = @creation_form.new(data.merge(external_contract_id: id))
+    @model.connection.transaction do
+      events.each do |event|
+        transaction_id = event[:transactionHash]
 
-        form.save
+        transaction = Ethereum::Singleton.instance.eth_get_transaction_receipt(transaction_id)
+        transaction.extend Hashie::Extensions::DeepFind
+        args = Ethereum::Decoder.new.decode_arguments(@inputs, transaction.deep_find('data'))
+
+        entity_id = args.first.to_i
+        mapped_item = ContractDataMapper.call(@contract, @entity_contract_name, entity_id)
+        next if mapped_item.blank?
+
+        puts mapped_item.merge!(external_contract_id: entity_id)
       end
     end
-  end
-
-  private
-
-  def process_redis_cache
-    conf = Rails.configuration.x.redis
-    block_number = Ethereum::Singleton.instance.eth_block_number['result'].to_i(16)
-
-    redis = ActiveSupport::Cache.lookup_store :redis_cache_store, url: conf.connection_string
-    redis.write(:last_watched_block, block_number)
   end
 end

@@ -9,23 +9,10 @@ namespace :contract do
         file_path: I18n.t('contracts_rake.path_info', file_path: contract_info.file_path)
       }
 
-      puts messages[:address]
       Rails.logger.info(messages[:address])
       Rails.logger.info(messages[:file_path])
     else
       Rails.logger.error(I18n.t('contracts_rake.errors.no_info'))
-    end
-  end
-
-  desc 'Seed IsbnRegistry contract with entities (only in development)'
-  task :seed_isbn_registry, [:number_of_tries] => :environment do |_, args|
-    unless Rails.env.production?
-      contract = AppContractHolder.instance.isbn_contract
-      number_of_tries = args[:number_of_tries]
-      id_before = contract.call.index
-      ContractIsbnRegistrySeeder.call(contract: contract, entity_count: number_of_tries)
-
-      Rails.logger.info("Created #{contract.call.index - id_before} entities in IsbnRegistry.")
     end
   end
 
