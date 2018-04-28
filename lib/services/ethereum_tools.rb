@@ -20,4 +20,10 @@ class EthereumTools
   def self.events_from_filter(contract, event_function_name, filter_id)
     contract.get_filter_logs.send(event_function_name.underscore, filter_id)
   end
+
+  def self.decode_outputs(transaction, mapped_inputs)
+    transaction.extend Hashie::Extensions::DeepFind
+
+    Ethereum::Decoder.new.decode_arguments(mapped_inputs, transaction.deep_find('data'))
+  end
 end

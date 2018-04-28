@@ -2,6 +2,7 @@ pragma solidity ^0.4.2;
 
 contract BookInstanceRegistry {
   enum EventType { Added, Changed }
+  enum BookState { Returned, Taken, Lost }
 
   struct BookInstance {
     bytes32 isbn10;
@@ -51,7 +52,7 @@ contract BookInstanceRegistry {
       isbn13: stringArgs[1],
       ownerInn: stringArgs[2],
       holderInn: stringArgs[3],
-      state: intArgs[0],
+      state: BookState.Returned,
       timeToReturn: intArgs[1]
     }));
 
@@ -61,10 +62,11 @@ contract BookInstanceRegistry {
   function setBookReturned(uint id) public {
     require(editorMapping[msg.sender]);
     require(id < bookInstances.length);
-    require(bookInstances[id].state != 2);
+    require(bookInstances[id].state != BookState.Lost);
 
     bookInstances[id].holderInn = bookInstances[id].ownerInn;
     bookInstances[id].timeToReturn = 0;
+    bookInstances[id].state = BookState.Returned;
 
     emit RegistryChanged(id, EventType.Changed, msg.sender);
   }
@@ -72,20 +74,23 @@ contract BookInstanceRegistry {
   function setBookTaken(uint id, bytes32 holderInn, uint timeToReturn) public {
     require(editorMapping[msg.sender]);
     require(id < bookInstances.length);
-    require(bookInstances[id].state != 2);
+    require(bookInstances[id].state != BookState.Lost);
     require(getLengthOfBytesLine(holderInn) == 12);
 
     bookInstances[id].holderInn = holderInn;
     bookInstances[id].timeToReturn = timeToReturn;
+    bookInstances[id].state = BookState.Taken;
+
     emit RegistryChanged(id, EventType.Changed, msg.sender);
   }
 
   function setBookLost(uint id) public {
     require(editorMapping[msg.sender]);
     require(id < bookInstances.length);
-    require(bookInstances[id].state != 2);
+    require(bookInstances[id].state != BookState.Lost);
 
-    bookInstances[id].state = 2;
+    bookInstances[id].timeToReturn = 0;
+    bookInstances[id].state = BookState.Lost;
 
     emit RegistryChanged(id, EventType.Changed, msg.sender);
   }

@@ -24,10 +24,8 @@ class RegistryImporter
     @model.connection.transaction do
       events.each do |event|
         transaction_id = event[:transactionHash]
-
         transaction = Ethereum::Singleton.instance.eth_get_transaction_receipt(transaction_id)
-        transaction.extend Hashie::Extensions::DeepFind
-        args = Ethereum::Decoder.new.decode_arguments(@inputs, transaction.deep_find('data'))
+        args = EthereumTools.decode_arguments(transaction, @inputs)
 
         entity_id = args.first.to_i
         mapped_item = ContractDataMapper.call(@contract, @entity_contract_name, entity_id)
