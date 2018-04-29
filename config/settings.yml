@@ -6,3 +6,6 @@ contracts:
   isbn_registry:
     file_path: <%= Rails.root.join('lib', 'solidity_scripts', 'isbn_registry.sol') %>
     address: '<%= ENV['ISBN_REGISTRY_ADDRESS'] %>'
+  book_instance_registry:
+    file_path: <%= Rails.root.join('lib', 'solidity_scripts', 'book_instance_registry.sol') %>
+    address: '<%= ENV['BOOK_INSTANCE_REGISTRY_ADDRESS'] %>'

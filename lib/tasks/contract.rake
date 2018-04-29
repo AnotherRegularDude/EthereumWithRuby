@@ -16,20 +16,18 @@ namespace :contract do
     end
   end
 
-  namespace :import do
-    desc 'Import IsbnRegistry data to database'
-    task isbn_registry: :environment do
-      contract = AppContractHolder.instance.isbn_contract
-      Rails.logger.info(I18n.t('contracts_rake.start_import'))
+  desc 'Deploy all specified if project contracts'
+  task deploy_all: :environment do
+    contracts = Rails.configuration.x.contracts
+    contracts.each_value do |contract_info|
+      contract = ContractCreator.call(path_to_contract: contract_info.file_path)
+      messages = {
+        address: I18n.t('contracts_rake.address_info', address: contract.address),
+        file_path: I18n.t('contracts_rake.path_info', file_path: contract_info.file_path)
+      }
 
-      RegistryImporter.call(
-        contract: contract,
-        mapper_name: 'bookEditions',
-        import_model: BookEdition,
-        creation_form: CreateBookEditionForm
-      )
-
-      Rails.logger.info(I18n.t('contracts_rake.imported'))
+      Rails.logger.info(messages[:address])
+      Rails.logger.info(messages[:file_path])
     end
   end
 end
