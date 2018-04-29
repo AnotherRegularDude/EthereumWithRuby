@@ -1,7 +1,7 @@
 class ContractCreator < ApplicationService
-  def initialize(path_to_contract:, args_for_contract: nil)
+  def initialize(path_to_contract, options = {})
     @path_to_contract = path_to_contract
-    @args_for_contract = args_for_contract
+    @args_for_contract = options[:args_for_contract]
   end
 
   def call

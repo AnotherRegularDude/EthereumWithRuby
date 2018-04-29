@@ -3,7 +3,7 @@ namespace :contract do
   task :deploy, [:name] => :environment do |_, args|
     contract_info = Rails.configuration.x.contracts[args[:name]]
     if contract_info.present?
-      contract = ContractCreator.call(path_to_contract: contract_info.file_path)
+      contract = ContractCreator.call(contract_info.file_path)
       messages = {
         address: I18n.t('contracts_rake.address_info', address: contract.address),
         file_path: I18n.t('contracts_rake.path_info', file_path: contract_info.file_path)
@@ -20,7 +20,7 @@ namespace :contract do
   task deploy_all: :environment do
     contracts = Rails.configuration.x.contracts
     contracts.each_value do |contract_info|
-      contract = ContractCreator.call(path_to_contract: contract_info.file_path)
+      contract = ContractCreator.call(contract_info.file_path)
       messages = {
         address: I18n.t('contracts_rake.address_info', address: contract.address),
         file_path: I18n.t('contracts_rake.path_info', file_path: contract_info.file_path)

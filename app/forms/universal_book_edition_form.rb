@@ -1,4 +1,4 @@
-class CreateBookEditionForm < ApplicationForm
+class UniversalBookEditionForm < ApplicationForm
   attr_reader :book_edition
 
   attribute :title, String
@@ -25,7 +25,7 @@ class CreateBookEditionForm < ApplicationForm
   validates :height, :width, :depth,  numericality: { greater_than_or_equal: 0 }, allow_nil: true
 
   def publish_date=(value)
-    @date = if value.is_a? Date
+    @publish_date = if value.is_a? Date
               value
             else
               Time.zone.at(value).to_date

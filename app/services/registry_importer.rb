@@ -17,7 +17,7 @@ class RegistryImporter < ApplicationService
       @contract,
       @input_name,
       from_block: blocks_result[:from_block],
-      to_block: blocks_result[:last_block]
+      to_block: blocks_result[:to_block]
     )
     events = EthereumTools.events_from_filter(@contract, @input_name, filter_id)
 

@@ -16,6 +16,7 @@ gem 'puma', '~> 3.7'
 gem 'rack-cors', require: 'rack/cors'
 gem 'rails', '~> 5.2.0'
 gem 'redis'
+gem 'rufus-scheduler'
 gem 'virtus'
 
 group :development, :test do

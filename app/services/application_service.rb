@@ -1,8 +1,8 @@
 # Base service class, which hold general logic.
 class ApplicationService
-  def self.call(**kwargs)
-    return new.call if kwargs.blank?
+  def self.call(*args)
+    return new.call if args.blank?
 
-    new(kwargs).call
+    new(*args).call
   end
 end
