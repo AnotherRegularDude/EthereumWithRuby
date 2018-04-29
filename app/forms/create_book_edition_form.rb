@@ -23,4 +23,12 @@ class CreateBookEditionForm < ApplicationForm
   validates :isbn10, length: { is: 10 }
   validates :isbn13, length: { is: 13 }
   validates :height, :width, :depth,  numericality: { greater_than_or_equal: 0 }, allow_nil: true
+
+  def publish_date=(value)
+    @date = if value.is_a? Date
+              value
+            else
+              Time.zone.at(value).to_date
+            end
+  end
 end
