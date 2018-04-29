@@ -19,7 +19,7 @@ contract BookInstanceRegistry {
 
   event RegistryChanged(uint id, EventType action, address changer);
 
-  constructor() {
+  constructor() public {
     owner = msg.sender;
 
     editorMapping[owner] = true;
@@ -44,7 +44,7 @@ contract BookInstanceRegistry {
 
   function addBookInstance(bytes32[] stringArgs, uint[] intArgs) public {
     require(editorMapping[msg.sender]);
-    require(stringArgs.length == 4 && intArgs.length == 2);
+    require(stringArgs.length == 4 && intArgs.length == 1);
     require(getLengthOfBytesLine(stringArgs[2]) == 12 && getLengthOfBytesLine(stringArgs[3]) == 12);
 
     bookInstances.push(BookInstance({
@@ -52,7 +52,7 @@ contract BookInstanceRegistry {
       isbn13: stringArgs[1],
       ownerInn: stringArgs[2],
       holderInn: stringArgs[3],
-      state: BookState.Returned,
+      state: uint(BookState.Returned),
       timeToReturn: intArgs[1]
     }));
 
@@ -62,11 +62,11 @@ contract BookInstanceRegistry {
   function setBookReturned(uint id) public {
     require(editorMapping[msg.sender]);
     require(id < bookInstances.length);
-    require(bookInstances[id].state != BookState.Lost);
+    require(bookInstances[id].state != uint(BookState.Lost));
 
     bookInstances[id].holderInn = bookInstances[id].ownerInn;
     bookInstances[id].timeToReturn = 0;
-    bookInstances[id].state = BookState.Returned;
+    bookInstances[id].state = uint(BookState.Returned);
 
     emit RegistryChanged(id, EventType.Changed, msg.sender);
   }
@@ -74,12 +74,12 @@ contract BookInstanceRegistry {
   function setBookTaken(uint id, bytes32 holderInn, uint timeToReturn) public {
     require(editorMapping[msg.sender]);
     require(id < bookInstances.length);
-    require(bookInstances[id].state != BookState.Lost);
+    require(bookInstances[id].state != uint(BookState.Lost));
     require(getLengthOfBytesLine(holderInn) == 12);
 
     bookInstances[id].holderInn = holderInn;
     bookInstances[id].timeToReturn = timeToReturn;
-    bookInstances[id].state = BookState.Taken;
+    bookInstances[id].state = uint(BookState.Taken);
 
     emit RegistryChanged(id, EventType.Changed, msg.sender);
   }
@@ -87,10 +87,10 @@ contract BookInstanceRegistry {
   function setBookLost(uint id) public {
     require(editorMapping[msg.sender]);
     require(id < bookInstances.length);
-    require(bookInstances[id].state != BookState.Lost);
+    require(bookInstances[id].state != uint(BookState.Lost));
 
     bookInstances[id].timeToReturn = 0;
-    bookInstances[id].state = BookState.Lost;
+    bookInstances[id].state = uint(BookState.Lost);
 
     emit RegistryChanged(id, EventType.Changed, msg.sender);
   }
