@@ -52,6 +52,8 @@ contract IsbnRegistry {
   function addBookEdition(bytes32[] stringArgs, uint[] intArgs, string description) public {
     require(editorMapping[msg.sender]);
     require(stringArgs.length == 4 && intArgs.length == 7);
+
+    require(getLengthOfBytesLine(stringArgs[0]) != 0);
     require(checkIsbn10(stringArgs[2]));
     require(checkIsbn13(stringArgs[3]));
 
