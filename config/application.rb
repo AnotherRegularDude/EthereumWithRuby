@@ -11,7 +11,6 @@ module PlayEthereumWithRuby
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 5.1
     config.time_zone = ENV['TIME_ZONE'] || raise('TIME_ZONE env is not set')
-    config.active_record.schema_format = :sql
 
     config.autoload_paths << Rails.root.join('lib')
     config.autoload_paths << Rails.root.join('lib', 'services')
