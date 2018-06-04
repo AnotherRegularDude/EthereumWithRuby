@@ -1,5 +1,5 @@
 class SessionForm < ApplicationForm
-  attr_reader :user
+  define_model :user
 
   attribute :username, String
   attribute :password, String
@@ -11,8 +11,8 @@ class SessionForm < ApplicationForm
   private
 
   def persist!
-    @user = User.find_by(username: username)&.authenticate(password)
-    return true if @user.present?
+    @model = User.find_by(username: username)&.authenticate(password)
+    return true if persisted?
 
     errors.add(:username)
     errors.add(:password)

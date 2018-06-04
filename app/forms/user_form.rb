@@ -1,17 +1,13 @@
 class UserForm < ApplicationForm
-  attr_writer :user
+  define_model :user
 
   attribute :username, String
   attribute :password, String
   attribute :role, Integer
 
-  validates :username, :password, presence: true, unless: proc { |form| form.user.persisted? }
+  validates :username, :password, presence: true, unless: :persisted?
   validates :role, inclusion: { in: 0..2 }, allow_blank: true
   validates :username, :password, length: { in: 4..20 }, allow_blank: true
-
-  def user
-    @user ||= User.new
-  end
 
   def username=(value)
     @username = value.downcase
@@ -20,8 +16,8 @@ class UserForm < ApplicationForm
   private
 
   def persist!
-    user.attributes = attributes.compact
-    user.save!
+    model.attributes = attributes.compact
+    model.save!
 
     true
   rescue ActiveRecord::RecordInvalid => invalid
